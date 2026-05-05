@@ -1,7 +1,7 @@
 import streamlit as st
 if "placelist" not in st.session_state:
 
-st.session_state.placelist = [
+    st.session_state.placelist = [
 placelist = [
     {"이름": "강릉 시립도서관", "지역": "강릉", "실내여부": "실내", "예산": 0, "한줄설명": "조용히 공부하기 좋은 공간"},
     {"이름": "강릉 중앙시장", "지역": "강릉", "실내여부": "실내", "예산": 10000, "한줄설명": "저렴하게 식사할 수 있는 시장"},
