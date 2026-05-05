@@ -1,5 +1,5 @@
 import streamlit as st
-"placelist" not in st.session_state:
+if "placelist" not in st.session_state:
 
 st.session_state.placelist = [
 placelist = [
