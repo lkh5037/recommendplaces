@@ -47,3 +47,8 @@ def show_charts()()
 
     st.subheader("지역별 평균 평점")
     st.bar_chart(avg_score)
+def load_data():
+
+
+
+
