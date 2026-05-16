@@ -1,140 +1,95 @@
 import streamlit as st
-if "placelist" not in st.session_state:
 
-    st.session_state.placelist = [{"이름": "강릉 시립도서관", "지역": "강릉", "실내여부": "실내", "예산": 0, "한줄설명": "조용히 공부하기 좋은 공간"},
-    {"이름": "강릉 중앙시장", "지역": "강릉", "실내여부": "실내", "예산": 10000, "한줄설명": "저렴하게 식사할 수 있는 시장"},
-    {"이름": "속초해변", "지역": "속초", "실내여부": "실외", "예산": 0, "한줄설명": "바다를 보며 쉬기 좋은 장소"},
-    {"이름": "춘천 시립도서관", "지역": "춘천", "실내여부": "실내", "예산": 0, "한줄설명": "공부와 독서에 적합한 공간"}]
-def show_all_places(place_list):
-    st.subheader("전체 장소 보기")
-    for place in place_list:
-        # 아래 빈칸을 완성하세요
-        st.write("장소 이름:", ____________________)
-        st.write("지역:", ____________________)
-        st.write("실내/실외:", ____________________)
-        st.write("예산:", ____________________, "원")
-        st.write("설명:", ____________________)
-        st.write("---")
+if "places" not in st.session_state:
+    st.session_state.places = [
+        {"이름":"강릉 경포해변","실내여부":"실외","가격대":0,"만족도":4.5,"운영시작":6,"운영종료":22,"혼잡도":14000},
+        {"이름":"춘천 레고랜드","실내여부":"실외","가격대":45000,"만족도":4.4,"운영시작":10,"운영종료":18,"혼잡도":7000},
+        {"이름":"강릉 중앙시장","실내여부":"실내","가격대":12000,"만족도":4.2,"운영시작":8,"운영종료":23,"혼잡도":16000},
+        {"이름":"오죽헌","실내여부":"실내","가격대":3000,"만족도":4.6,"운영시작":9,"운영종료":18,"혼잡도":5000}
+    ]
 
+def place_output(result):
+    if result == []:
+        st.write("조건에 맞는 장소가 없습니다")
+    else:
+        for place in result:
+            for key in place:
+                st.write(key, " : ", place[key])
+            st.write("---")
 
-def find_places(place_list, region, place_type, budget):
+def place_search_by_category(place_list,key,value):
     result = []
     for place in place_list:
-        # 아래 조건문을 완성하세요
-        if ______________________________________________:
+        if (place[key] == value or value == "전부"):
             result.append(place)
     return result
 
+def place_search_by_number(place_list,key,value,mode):
+    result = []
+    for place in place_list:
+        if mode == "전부" or (mode == "기준 이상" and place[key] >= value) or (mode == "기준 이하" and place[key] <= value):
+            result.append(place)
+    return result
 
-def add_place(place_list, name, region, place_type, budget, description):
+def place_add(place_list,name,indoor,price,score,start,end,crowd):
     new_place = {
-        "이름": ____________________,
-        "지역": ____________________,
-        "실내여부": ____________________,
-        "예산": ____________________,
-        "한줄설명": ____________________
+        "이름": name,
+        "실내여부": indoor,
+        "가격대": price,
+        "만족도": score,
+        "운영시작": start,
+        "운영종료": end,
+        "혼잡도": crowd
     }
     place_list.append(new_place)
 
+def place_search_by_number_total(result_input,key,min,jump,max):
+    mode = st.radio(key + " 검색 기준을 선택하세요", ["전부", "기준 이상", "기준 이하"])
+    if mode != "전부":
+        if max == 0:
+            value = st.number_input(key + "을(를) 입력하세요",min_value=min, step=jump)
+        else:
+            value = st.number_input(key + "을(를) 입력하세요",min_value=min, step=jump,max_value=max)
+        result = place_search_by_number(result_input,key,value,mode)
+        return result
+    else:
+        return result_input
 
 st.title("강원생활도우미앱")
 
 menu = st.selectbox("기능을 선택하세요", ["전체 보기", "추천 받기", "장소 추가"])
 
 if menu == "전체 보기":
-    show_all_places(placelist)
+    st.subheader("전체 결과")
+    place_output(st.session_state.places)
 
 elif menu == "추천 받기":
-    region = st.selectbox("지역을 선택하세요", ["강릉", "속초", "춘천"])
-    place_type = st.selectbox("실내/실외를 선택하세요", ["실내", "실외"])
-    budget = st.number_input("사용 가능한 예산을 입력하세요", min_value=0, step=1000, value=5000)
+    indoor = st.selectbox("실내여부를 선택하세요", ["전부", "실내", "실외"])
+    result = place_search_by_category(st.session_state.places,"실내여부",indoor)
+    result = place_search_by_number_total(result,"가격대",0,1000,0)
+    result = place_search_by_number_total(result,"만족도",0.0,0.1,5.0)
 
-    result_places = find_places(st.session_state.placelist, region, place_type, budget)
+    time_mode = st.radio("방문 시간 검색 방식을 선택하세요", ["전부", "선택"])
+
+    if time_mode != "전부":
+        time = st.number_input("방문 시각을 입력하세요",min_value=0, step=1,max_value=24)
+        result = place_search_by_number(result,"운영시작",time,"기준 이하")
+        result = place_search_by_number(result,"운영종료",time,"기준 이상")
+
+    result = place_search_by_number_total(result,"혼잡도",0,1000,0)
 
     st.subheader("추천 결과")
-
-    # 아래 빈칸을 완성하세요
-    if __________________________________:
-        for place in result_places:
-            st.write("장소 이름:", place["이름"])
-            st.write("설명:", place["한줄설명"])
-            st.write("예산:", place["예산"], "원")
-            st.write("---")
-    else:
-        st.write("조건에 맞는 장소가 없습니다")
+    place_output(result)
 
 elif menu == "장소 추가":
     name = st.text_input("장소 이름을 입력하세요")
-    region = st.selectbox("지역을 선택하세요", ["강릉", "속초", "춘천"])
-    place_type = st.selectbox("실내/실외를 선택하세요", ["실내", "실외"])
-    budget = st.number_input("예산을 입력하세요", min_value=0, step=1000)
-    description = st.text_input("한줄 설명을 입력하세요")
+    indoor = st.selectbox("실내/실외를 선택하세요", ["실내", "실외"])
+    price = st.number_input("새 장소의 가격대를 입력하세요", min_value=0, step=1000)
+    score = st.number_input("새 장소의 만족도를 입력하세요", min_value=0.0, step=0.1, max_value=5.0)
+    start = st.number_input("새 장소의 운영시작 시간을 입력하세요", min_value=0, step=1, max_value=24)
+    end = st.number_input("새 장소의 운영종료 시간을 입력하세요", min_value=0, step=1, max_value=24)
+    crowd = st.number_input("새 장소의 혼잡도를 입력하세요", min_value=0, step=1000)
 
     if st.button("장소 추가"):
-        # 아래 함수 호출을 완성하세요
-        ______________________________________________
+        place_add(st.session_state.places,name,indoor,price,score,start,end,crowd)
         st.success("새 장소가 추가되었습니다")
-        import streamlit as st
-import pandas as pd
-
-st.title("강원생활도우미앱 2.0")
-st.write("엑셀 파일을 업로드하면 장소 데이터를 확인할 수 있습니다.")
-
-uploaded_file = st.file_uploader(
-    "장소 데이터 엑셀 파일을 업로드하세요",
-    type=["xlsx"]
-)
-
-if uploaded_file is not None:
-    df = pd.read_excel(uploaded_file)
-
-    st.subheader("업로드한 장소 데이터")
-    st.dataframe(df)
-else:
-    st.info("엑셀 파일을 업로드하면 데이터가 표시됩니다.")
-import streamlit as st
-import pandas as pd
-
-st.title("강원생활도우미 앱 2.0")
-st.write("엑셀 화일을 업로드 할 수 있습니다.")
-
-uploaded_file = st.file_uploader(
-  "장소 데이터 엑셀 파일을 업로드해주세요.",
-  type=["xlsx"]
-)
-
-if uploaded_file is not None:
-  df = pd.read_excel(uploaded_file)
-  st.subheader("업로드한 장소 목록")
-  st.dataframe(df)
-else:
-  st.info("데이터를 저장한 엑셀(확장자.xlxs)화일을 업로드하세요.")
-
-selected_region = st.selectbox("지역 선택", df["지역"].unique())
-selected_budget = st.number_input("가용예산",  min_value=0, value=10000, step=500)
-
-result = df[
-   (df["지역"] == selected_region) &
-   (df["예산"] <= selected_budget)
-]
-
-st.subheader("추천 결과 목록")
-if len(result) > 0:
-  st.dataframe(result)
-else:
-  st.warning("조건에 맞는 장소가 없습니다.")
-
-region_count = df["지역"].value_counts()
-
-st.subheader("지역별 장소 개수")
-st.bar_chart(region_count)
-
-type_count = df["유형"].value_counts()
-
-st.subheader("유형별 장소 개수")
-st.bar_chart(type_count)
-
-avg_score = df.groupby("지역")["평점"].mean()
-
-st.subheader("지역별 평균 평점")
-st.bar_chart(avg_score)
