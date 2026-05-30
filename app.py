@@ -184,3 +184,54 @@ if uploaded_file is not None:
 
     elif menu == "데이터 시각화":
         show_chart(merged_df)
+import tkinter as tk
+from tkinter import ttk
+from tkinter import filedialog
+
+root = tk.Tk()
+root.title("강원생활도우미앱 3.0")
+root.geometry("700x500")
+root.configure(bg="#f5f5f5")
+
+style = ttk.Style()
+style.theme_use("clam")
+style.configure("TLabel", background="#f5f5f5", font=("Malgun Gothic", 11))
+style.configure("Title.TLabel", background="#f5f5f5", font=("Malgun Gothic", 18, "bold"))
+style.configure("SubTitle.TLabel", background="#f5f5f5", font=("Malgun Gothic", 14, "bold"))
+style.configure("TCombobox", font=("Malgun Gothic", 10))
+
+main_frame = ttk.Frame(root, padding=30, style="TLabel")
+main_frame.pack(fill=tk.BOTH, expand=True)
+
+title_label = ttk.Label(main_frame, text="강원생활도우미앱 3.0", style="Title.TLabel")
+title_label.pack(anchor="w", pady=(0, 15))
+
+excel_label = ttk.Label(main_frame, text="엑셀 파일")
+excel_label.pack(anchor="w", pady=(0, 5))
+
+upload_frame = tk.Frame(main_frame, bg="#e0e0e0", height=60, bd=1, relief="solid")
+upload_frame.pack(fill=tk.X, pady=(0, 25))
+upload_frame.pack_propagate(False)
+
+file_btn = tk.Button(upload_frame, text="📁", font=("Malgun Gothic", 14), bg="#333333", fg="white", bd=0, width=4, command=lambda: filedialog.askopenfilename())
+file_btn.pack(side=tk.LEFT, padx=10, pady=10)
+
+recommend_label = ttk.Label(main_frame, text="추천", style="SubTitle.TLabel")
+recommend_label.pack(anchor="w", pady=(0, 15))
+
+def create_dropdown(parent, label_text, default_value):
+    label = ttk.Label(parent, text=label_text)
+    label.pack(anchor="w", pady=(5, 2))
+    
+    combo_border = tk.Frame(parent, bg="#cccccc", bd=1)
+    combo_border.pack(fill=tk.X, pady=(0, 10))
+    
+    combo = ttk.Combobox(combo_border, values=[default_value, "옵션 2", "옵션 3"], state="readonly")
+    combo.set(default_value)
+    combo.pack(fill=tk.X, ipady=4)
+    
+    combo.configure(background="white")
+
+create_dropdown(main_frame, "지역 선택", "강릉")
+create_dropdown(main_frame, "추천목적 선택", "공부")
+create_dropdown(main_frame, "추천상황 선택", "비오는날")
